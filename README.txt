@@ -8,7 +8,7 @@ sudo pip install yara-python
 More information on yara-python can be found at the GitHub project page
 https://github.com/VirusTotal/yara-python
 
-Copyright (C) 2018 Patrick Skelley, <pskelley@albany.edu>
+Copyright (C) 2018 Patrick Skelley, <pskelley@albany.edu>, University at Albany, SUNY, Albany NY
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
