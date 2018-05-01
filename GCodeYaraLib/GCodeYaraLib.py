@@ -16,15 +16,38 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import yara
-import os.stat, os.path
+import os
 
 class GCodeYaraPrinterProfile:
-    def __init__(self,  filename):
-        ValidateFileInput(filename)
-        self.filename = filename
+    
+    basicSettings = ["PRINTER_NAME","MAX_X", "MAX_Y", "MAX_Z", "MAX_TEMP_C"]
+    
+    def __init__(self, outYarFileName,  printerSettings = None):
+        self.filename = outYarFileName
         
+        if printerSettings == None:
+            self.printerSettings = self.BuildProfile()
+        else:
+            self.printerSettings = printerSettings
+        
+        with open(self.filename, "w+") as yar:
+                yar.write(self.GenerateProfile())
+        
+    def BuildProfile(self):
+        retVal = []
+        print("Provide values for the following printer settings")
+        for setting in self.basicSettings:
+            temp = input(setting +":")
+            retVal.append((setting, temp))
+        return retVal
+
     def GenerateProfile(self):
-        return True
+        profile = "rule PrinterProfile1\n{\n\tcondition:\n" +  \
+                    "".join(
+                            list(
+                            map( lambda k : '\t\t{} == {}\n'.format(k[0], k[1]), 
+                                    self.printerSettings))) + "\n}"
+        return(profile)
         
 class GCodeYaraScanner:
     
