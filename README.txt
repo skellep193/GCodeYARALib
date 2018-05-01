@@ -5,6 +5,7 @@ GCodeYaraLib uses YARA to allow for GCode parsing and identification of potentia
 The library requires the installation of yara-python in order to function. Yara-python can be downloaded using pip.
 sudo pip install yara-python
 
+More information on yara-python can be found at the GitHub project page
 https://github.com/VirusTotal/yara-python
 
 Copyright (C) 2018 Patrick Skelley, <pskelley@albany.edu>
