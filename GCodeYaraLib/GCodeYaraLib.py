@@ -20,7 +20,7 @@ import os
 
 class GCodeYaraPrinterProfile:
     
-    basicSettings = ["PRINTER_NAME","MAX_X", "MAX_Y", "MAX_Z", "MAX_TEMP_C"]
+    basicSettings = ["PRINTER_NAME","MAX_X", "MAX_Y", "MAX_Z","MAX_ACC","MAX_TEMP_C"]
     
     def __init__(self, outYarFileName,  printerSettings = None):
         self.filename = outYarFileName

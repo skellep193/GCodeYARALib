@@ -19,6 +19,9 @@ from GCodeYaraLib import GCodeYaraPrinterProfile,  GCodeYaraScanner
 
 def main():
     GCodeYaraPrinterProfile("PrinterProfile.yar")
+    gcys = GCodeYaraScanner("test.gcode",  "rules.yar",  "PrinterProfile.yar")
+    gcys.ScanFile()
+    
     
 if __name__ == "__main__":
     main()
