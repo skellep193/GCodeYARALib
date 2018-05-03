@@ -15,12 +15,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import yara
 import os
 
 class GCodeYaraPrinterProfile:
     
-    basicSettings = ["PRINTER_NAME","MAX_X", "MAX_Y", "MAX_Z","MAX_ACC","MAX_TEMP_C"]
+    basicSettings = ["PRINTER_NAME","MAX_X", "MAX_Y", "MAX_Z","MAX_ACC","MAX_EXT_TEMP_C", "MAX_BED_TEMP_C"]
     
     def __init__(self, outYarFileName,  printerSettings = None):
         self.filename = outYarFileName
@@ -30,48 +31,49 @@ class GCodeYaraPrinterProfile:
         else:
             self.printerSettings = printerSettings
         
-        with open(self.filename, "w+") as yar:
-                yar.write(self.GenerateProfile())
+        # save as json
+        with open(self.filename, "w+") as js:
+                json.dump(self.printerSettings, js )
         
     def BuildProfile(self):
-        retVal = []
+        retVal = {}
         print("Provide values for the following printer settings")
         for setting in self.basicSettings:
             temp = input(setting +":")
-            retVal.append((setting, temp))
+            retVal[setting] = temp
         return retVal
 
-    def GenerateProfile(self):
-        profile = "rule PrinterProfile1\n{\n\tcondition:\n" +  \
-                    "".join(
-                            list(
-                            map( lambda k : '\t\t{} == {}\n'.format(k[0], k[1]), 
-                                    self.printerSettings))) + "\n}"
-        return(profile)
-        
 class GCodeYaraScanner:
     
-    def __init__(self,  gcodeScanFile,yarRuleFile, yarPrinterConfigFile):
-        ValidateFileInput(gcodeScanFile,  ".gcode")
-        ValidateFileInput(yarPrinterConfigFile, ".yar")
+    def __init__(self,  gcodeScanFile,yarRuleFile, jsonPrinterConfigFile):
         self.gcodeFile = gcodeScanFile
-        self.yarPrinterFile = yarPrinterConfigFile
-        self.yarRulefile = yarRuleFile
+        self.yarPrinterFile = jsonPrinterConfigFile
+        self.yarRuleFile = yarRuleFile
+        
+        with open(jsonPrinterConfigFile, 'r' ) as js:
+            self.printerSettings = json.load(js)
         
     def ScanFile(self):
-        try:
-            rules = yara.compile(filepaths={
-                'r1': self.yarPrinterFile, 
-                'r2': self.yarRuleFile
-            })
-            
-            matches = rules.match(self.gcodeFile)
-            
-        except:
-            return None
-            
-        return matches
+
+        rules = yara.compile(filepaths={
+            'r1': self.yarRuleFile
+        }, externals=self.printerSettings)
         
+        matches = rules.match(self.gcodeFile)
+        #return(matches)
+        return self.PerformSecondaryScan(matches)
+    
+    # for POC purposes only. Demonstrates overheating beyond assigned MAX_EXT_TEMP_C
+    def PerformSecondaryScan(self,  matches):
+        filteredMatches = []
+        for match in matches:
+            for string in match.strings:
+                 num = int(str(string[2])[8:-1])
+                 #print(num)
+                 #print(self.printerSettings["MAX_EXT_TEMP_C"])
+                 if num > int(self.printerSettings["MAX_EXT_TEMP_C"]):
+                     filteredMatches.append(string)
+        return filteredMatches
     
 def ValidateFileInput(checkname,  extension):
     if os.path.exists(checkname) != 1:

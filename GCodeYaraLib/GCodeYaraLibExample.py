@@ -17,11 +17,20 @@
 
 from GCodeYaraLib import GCodeYaraPrinterProfile,  GCodeYaraScanner
 
+
+
 def main():
-    GCodeYaraPrinterProfile("PrinterProfile.yar")
-    gcys = GCodeYaraScanner("test.gcode",  "rules.yar",  "PrinterProfile.yar")
-    gcys.ScanFile()
     
+    # Generate and save a json file containing printer settings
+    GCodeYaraPrinterProfile("PrinterProfile.json")
+    
+    # scan the gcode file using the specified rules and printer profile
+    gcys = GCodeYaraScanner("TestFile.gcode",  "Rules.yar",  "PrinterProfile.json")
+    matches = gcys.ScanFile()
+    for match in matches:
+        print(str(match))
+    
+    input("Hit Enter")
     
 if __name__ == "__main__":
     main()

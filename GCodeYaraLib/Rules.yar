@@ -1,11 +1,12 @@
-rule Exceeds_Max_Z
+rule Exceeds_Max_Extruder_Temp
 {
 	meta:
 		author = "skellep193"
-		description = "Looks for g-code exceeding max-z"
+		description = "Looks for g-code exceeding max extruder temp"
 		date = "2018-05"
 	strings:
-		$c0 = /[0-9a-fA-F]{20}/ fullword ascii
+		$re1 = /M104 S[0-9]+/
+
 	condition:
-		$c0
+		$re1
 }
